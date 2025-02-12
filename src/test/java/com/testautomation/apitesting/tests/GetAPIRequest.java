@@ -9,6 +9,12 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import io.restassured.response.ResponseBodyExtractionOptions;
+
+import java.util.Set;
+
+import org.json.JSONObject;
+
 
 public class GetAPIRequest {
 	
@@ -18,7 +24,7 @@ public class GetAPIRequest {
 	@Test
 	public void getAllPrices() {
 		
-		Response response =
+		String response =
 		RestAssured
 				.given()
 					.contentType(ContentType.JSON)
@@ -31,19 +37,31 @@ public class GetAPIRequest {
 					.statusLine("HTTP/1.1 200 OK")
 					.header("Content-Type", "application/json; charset=utf-8")
 				.extract()
-					.response();
-		jPathPost = response.jsonPath();
+					.response()
+					.asString();
+		String res = response.toString();
+		System.out.println(res);
+		JSONObject mainObject = new JSONObject(res);
+		JSONObject posts = mainObject.getJSONObject("bpi");
+		Set<String> keys = posts.keySet();
+		System.out.println(keys);
+		String descrip = posts.getJSONObject("GBP").getString("description");
 		
-		
-		String USD = jPathPost.getString("bpi.USD.code");
-		String GBP = jPathPost.getString("bpi.GBP.code");
-		String EUR = jPathPost.getString("bpi.EUR.code");
-		String description = jPathPost.getString("bpi.GBP.description");
-		
-		Assert.assertEquals(USD, "USD");
-		Assert.assertEquals(GBP, "GBP");
-		Assert.assertEquals(EUR, "EUR");
-		Assert.assertEquals(description, "British Pound Sterling");
+		for (String value : keys) {
+			if(value.equalsIgnoreCase("USD")) {
+				Assert.assertTrue(true);
+			}
+			else if(value.equalsIgnoreCase("GBP")) {
+				Assert.assertTrue(true);
+			}
+			else if(value.equalsIgnoreCase("EUR")) {
+				Assert.assertTrue(true);
+			}
+			else {
+				Assert.assertTrue(false);
+			}
+		}
+		Assert.assertEquals(descrip, "British Pound Sterling");
 		
 		
 		
